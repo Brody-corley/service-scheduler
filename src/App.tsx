@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
+import Login from './components/Login'
 import MemberList from './components/MemberList'
 import ScheduleView from './components/ScheduleView'
 import NotificationPanel from './components/NotificationPanel'
@@ -18,6 +19,7 @@ interface Assignment {
 }
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [members, setMembers] = useState<Member[]>([
     { id: '1', name: 'John Smith', email: 'john@example.com', phone: '555-1234' },
     { id: '2', name: 'Sarah Johnson', email: 'sarah@example.com', phone: '555-5678' },
@@ -26,6 +28,50 @@ function App() {
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [activeTab, setActiveTab] = useState<'schedule' | 'members' | 'notifications'>('schedule')
   const [notifications, setNotifications] = useState<string[]>([])
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const savedMembers = localStorage.getItem('members')
+    const savedAssignments = localStorage.getItem('assignments')
+    
+    if (savedMembers) setMembers(JSON.parse(savedMembers))
+    if (savedAssignments) setAssignments(JSON.parse(savedAssignments))
+  }, [])
+
+  // Save data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('members', JSON.stringify(members))
+  }, [members])
+
+  useEffect(() => {
+    localStorage.setItem('assignments', JSON.stringify(assignments))
+  }, [assignments])
+
+  // Handle login
+  const handleLogin = (password: string) => {
+    // Simple password check (in production, use proper authentication)
+    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123'
+    if (password === adminPassword) {
+      setIsLoggedIn(true)
+      localStorage.setItem('isLoggedIn', 'true')
+    } else {
+      alert('Invalid password')
+    }
+  }
+
+  // Check if already logged in
+  useEffect(() => {
+    const wasLoggedIn = localStorage.getItem('isLoggedIn')
+    if (wasLoggedIn) {
+      setIsLoggedIn(true)
+    }
+  }, [])
+
+  // Logout
+  const handleLogout = () => {
+    setIsLoggedIn(false)
+    localStorage.removeItem('isLoggedIn')
+  }
 
   // Add new member
   const addMember = (name: string, email: string, phone?: string) => {
@@ -57,13 +103,14 @@ function App() {
     setAssignments(assignments.filter(a => !(a.date === date && a.memberId === memberId)))
   }
 
-  // Send notifications
+  // Send notifications (simulated)
   const sendNotifications = (date: string) => {
     const dateAssignments = assignments.filter(a => a.date === date && !a.notified)
     dateAssignments.forEach(assignment => {
       const member = members.find(m => m.id === assignment.memberId)
       if (member) {
-        const newNotification = `Notified ${member.name} for ${date} - Email sent to ${member.email}`
+        // In production, call backend API to send real email
+        const newNotification = `📧 Email sent to ${member.name} (${member.email}) for ${date}`
         setNotifications(prev => [newNotification, ...prev])
         setAssignments(assignments.map(a =>
           a.date === date && a.memberId === assignment.memberId ? { ...a, notified: true } : a
@@ -72,11 +119,22 @@ function App() {
     })
   }
 
+  if (!isLoggedIn) {
+    return <Login onLogin={handleLogin} />
+  }
+
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>📅 Service Scheduler</h1>
-        <p>Schedule members for Saturday service meetings</p>
+        <div className="header-content">
+          <div>
+            <h1>📅 Service Scheduler</h1>
+            <p>Schedule members for Saturday service meetings</p>
+          </div>
+          <button className="btn-logout" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </header>
 
       <nav className="nav-tabs">
