@@ -137,7 +137,7 @@ export default function MemberAuth({ onBack, onLoginSuccess }: Props) {
           </p>
         </div>
 
-        <button type="button" className="back-btn" onClick={onBack}>
+        <button type="button" className="back-btn" onClick={onBack} style={{ display: 'none' }}>
           ← Back
         </button>
       </div>

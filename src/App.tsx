@@ -143,17 +143,14 @@ function App() {
     })
   }
 
-  // Show login screen
+  // Show member auth directly (no admin login)
   if (!userRole) {
-    if (showMemberAuth) {
-      return (
-        <MemberAuth
-          onBack={() => setShowMemberAuth(false)}
-          onLoginSuccess={handleMemberLogin}
-        />
-      )
-    }
-    return <Login onAdminLogin={handleAdminLogin} onMemberLogin={() => setShowMemberAuth(true)} />
+    return (
+      <MemberAuth
+        onBack={() => {}}
+        onLoginSuccess={handleMemberLogin}
+      />
+    )
   }
 
   // Show member dashboard
