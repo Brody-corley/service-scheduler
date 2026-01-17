@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import Login from './components/Login'
+import MemberAuth from './components/MemberAuth'
+import MemberDashboard from './components/MemberDashboard'
 import MemberList from './components/MemberList'
 import ScheduleView from './components/ScheduleView'
 import NotificationPanel from './components/NotificationPanel'
@@ -18,8 +20,14 @@ interface Assignment {
   notified: boolean
 }
 
+type UserRole = 'admin' | 'member' | null
+
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userRole, setUserRole] = useState<UserRole>(null)
+  const [showMemberAuth, setShowMemberAuth] = useState(false)
+  const [currentMemberId, setCurrentMemberId] = useState<string | null>(null)
+  const [currentMemberName, setCurrentMemberName] = useState<string | null>(null)
+
   const [members, setMembers] = useState<Member[]>([
     { id: '1', name: 'John Smith', email: 'john@example.com', phone: '555-1234' },
     { id: '2', name: 'Sarah Johnson', email: 'sarah@example.com', phone: '555-5678' },
@@ -33,9 +41,23 @@ function App() {
   useEffect(() => {
     const savedMembers = localStorage.getItem('members')
     const savedAssignments = localStorage.getItem('assignments')
-    
+    const currentUser = localStorage.getItem('currentUser')
+
     if (savedMembers) setMembers(JSON.parse(savedMembers))
     if (savedAssignments) setAssignments(JSON.parse(savedAssignments))
+    
+    // Check if user was already logged in
+    if (currentUser) {
+      const user = JSON.parse(currentUser)
+      setUserRole('member')
+      setCurrentMemberId(user.id)
+      setCurrentMemberName(user.name)
+    }
+
+    const wasAdminLoggedIn = localStorage.getItem('isAdminLoggedIn')
+    if (wasAdminLoggedIn) {
+      setUserRole('admin')
+    }
   }, [])
 
   // Save data to localStorage whenever it changes
@@ -47,30 +69,33 @@ function App() {
     localStorage.setItem('assignments', JSON.stringify(assignments))
   }, [assignments])
 
-  // Handle login
-  const handleLogin = (password: string) => {
-    // Simple password check (in production, use proper authentication)
+  // Handle admin login
+  const handleAdminLogin = (password: string) => {
     const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123'
     if (password === adminPassword) {
-      setIsLoggedIn(true)
-      localStorage.setItem('isLoggedIn', 'true')
+      setUserRole('admin')
+      localStorage.setItem('isAdminLoggedIn', 'true')
     } else {
       alert('Invalid password')
     }
   }
 
-  // Check if already logged in
-  useEffect(() => {
-    const wasLoggedIn = localStorage.getItem('isLoggedIn')
-    if (wasLoggedIn) {
-      setIsLoggedIn(true)
-    }
-  }, [])
+  // Handle member login
+  const handleMemberLogin = (userId: string, name: string) => {
+    setUserRole('member')
+    setCurrentMemberId(userId)
+    setCurrentMemberName(name)
+    setShowMemberAuth(false)
+  }
 
   // Logout
   const handleLogout = () => {
-    setIsLoggedIn(false)
-    localStorage.removeItem('isLoggedIn')
+    setUserRole(null)
+    setShowMemberAuth(false)
+    setCurrentMemberId(null)
+    setCurrentMemberName(null)
+    localStorage.removeItem('isAdminLoggedIn')
+    localStorage.removeItem('currentUser')
   }
 
   // Add new member
@@ -109,7 +134,6 @@ function App() {
     dateAssignments.forEach(assignment => {
       const member = members.find(m => m.id === assignment.memberId)
       if (member) {
-        // In production, call backend API to send real email
         const newNotification = `📧 Email sent to ${member.name} (${member.email}) for ${date}`
         setNotifications(prev => [newNotification, ...prev])
         setAssignments(assignments.map(a =>
@@ -119,17 +143,40 @@ function App() {
     })
   }
 
-  if (!isLoggedIn) {
-    return <Login onLogin={handleLogin} />
+  // Show login screen
+  if (!userRole) {
+    if (showMemberAuth) {
+      return (
+        <MemberAuth
+          onBack={() => setShowMemberAuth(false)}
+          onLoginSuccess={handleMemberLogin}
+        />
+      )
+    }
+    return <Login onAdminLogin={handleAdminLogin} onMemberLogin={() => setShowMemberAuth(true)} />
   }
 
+  // Show member dashboard
+  if (userRole === 'member' && currentMemberId) {
+    return (
+      <MemberDashboard
+        userId={currentMemberId}
+        userName={currentMemberName || 'Member'}
+        members={members}
+        assignments={assignments}
+        onLogout={handleLogout}
+      />
+    )
+  }
+
+  // Show admin dashboard
   return (
     <div className="app-container">
       <header className="app-header">
         <div className="header-content">
           <div>
             <h1>📅 Service Scheduler</h1>
-            <p>Schedule members for Saturday service meetings</p>
+            <p>Admin Dashboard - Schedule members for Saturday service meetings</p>
           </div>
           <button className="btn-logout" onClick={handleLogout}>
             Logout
