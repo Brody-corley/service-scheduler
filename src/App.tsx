@@ -162,7 +162,6 @@ function App() {
       <MemberDashboard
         userId={currentMemberId}
         userName={currentMemberName || 'Member'}
-        members={members}
         assignments={assignments}
         onLogout={handleLogout}
       />

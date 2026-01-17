@@ -16,7 +16,6 @@ interface Assignment {
 interface Props {
   userId: string
   userName: string
-  members: Member[]
   assignments: Assignment[]
   onLogout: () => void
 }
