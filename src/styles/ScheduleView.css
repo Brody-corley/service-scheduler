@@ -1,0 +1,144 @@
+.schedule-view {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.schedule-controls {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: var(--gray-700);
+  min-width: 150px;
+}
+
+.control-group select {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+
+.control-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.saturdays-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.saturday-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.saturday-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.15);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.card-header h3 {
+  font-size: 1.25rem;
+  color: var(--gray-900);
+}
+
+.badge-pending {
+  background-color: var(--warning-color);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.assigned-members {
+  margin-bottom: 1.5rem;
+}
+
+.assigned-members h4 {
+  font-size: 0.95rem;
+  color: var(--gray-700);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.assigned-members ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.assigned-members li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: var(--gray-50);
+  border-radius: 6px;
+  border-left: 3px solid var(--primary-color);
+}
+
+.assigned-members span {
+  color: var(--gray-900);
+  font-weight: 500;
+}
+
+.assigned-members .empty {
+  color: var(--gray-500);
+  font-style: italic;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .saturdays-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .control-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .control-group select {
+    width: 100%;
+  }
+}
